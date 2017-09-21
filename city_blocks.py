@@ -1,18 +1,19 @@
 import numpy as np
 from numpy.linalg import norm
 from tqdm import tqdm
-from config import lat_key, lon_key, MAX_RECURSION_DEPTH
+from config import lat_key, lon_key
 from shapely.geometry import Polygon
 import geopandas as gpd
 
 # Algorithm described here: 
 # https://blog.reactoweb.com/2012/04/algorithm-101-finding-all-polygons-in-an-undirected-graph/
 
-def angle(a,b):
-#     print(a, b)
+_MAX_RECURSION_DEPTH = 999
+
+def _angle(a,b):
     return np.degrees(np.arccos(np.dot(a, b)/(norm(a)*norm(b))))*np.sign(np.cross(b,a))
 
-def step(graph, edge, path, depth, traversed, edge_coords, polygons):
+def _step(graph, edge, path, depth, traversed, edge_coords, polygons):
     depth += 1
     
     # create list of successors to the edge
@@ -29,7 +30,7 @@ def step(graph, edge, path, depth, traversed, edge_coords, polygons):
         return 
 
     # calculate angles to incoming edge and order successors by smallest angle
-    angles = [angle(edge_coords.get(edge), edge_coords.get(successor)) for successor in successors]
+    angles = [_angle(edge_coords.get(edge), edge_coords.get(successor)) for successor in successors]
     
     # pick leftmost edge
     edge_to_walk = successors[np.argmin(angles)]
@@ -40,13 +41,24 @@ def step(graph, edge, path, depth, traversed, edge_coords, polygons):
         polygons.append(path)
         return
     else:
-        if depth > MAX_RECURSION_DEPTH:
+        if depth > _MAX_RECURSION_DEPTH:
             return
         path.append(edge_to_walk)   
-        step(graph, edge_to_walk, path, depth, traversed, edge_coords, polygons)
+        _step(graph, edge_to_walk, path, depth, traversed, edge_coords, polygons)
 
 
 def city_blocks(street_graph):
+    """
+    Given a street graph, returns city-blocks, i.e., blocks of land that occupy 
+    space in the city and are encapsulated by roads on every side.
+
+    Args:
+        street_graph (networkx.classes.multidigraph): graph representing street network as returned by osmnx.
+
+    Returns: 
+        
+
+    """
     directed = street_graph.to_directed()
 
     # pre-compute mapping from edge name to edge coordinates
@@ -60,7 +72,7 @@ def city_blocks(street_graph):
 
     for edge in tqdm(directed.edges()):
         path = [edge]
-        step(directed, edge, path, 0, traversed, edge_coords, graph_polygons)
+        _step(directed, edge, path, 0, traversed, edge_coords, graph_polygons)
         
     # Remove the polygon with the most nodes (assuming that it is the perimeter
     polygons = sorted(graph_polygons, key=lambda x: len(x))[:-1]
@@ -71,8 +83,6 @@ def city_blocks(street_graph):
                     for n in path] for path in polygons_points]
     polygons = [Polygon(path) for path in path_coords]
     areas = gpd.GeoDataFrame({'geometry': polygons})
-
-
     return areas
 
 
