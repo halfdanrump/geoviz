@@ -4,6 +4,7 @@ from tqdm import tqdm
 from config import lat_key, lon_key
 from shapely.geometry import Polygon
 import geopandas as gpd
+import osmnx as ox
 
 # Algorithm described here: 
 # https://blog.reactoweb.com/2012/04/algorithm-101-finding-all-polygons-in-an-undirected-graph/
@@ -86,4 +87,77 @@ def city_blocks(street_graph):
     return areas
 
 
+def remove_deadends(g, plot_all=False):
+    """
+    Reduce the number of nodes and edges in g by iteratively removing
+    every node with degree one, and the connected vertex.
+    
+    Args:
+        g (networkx.classes.multidigraph): Street graph from osmnx.
+    
+    Returns:
+        networkx.classes.multidigraph: The simplified street graph.
+    """
+    
+    simpler = g.to_undirected().copy()
+    while True:
+        nc = ['r' if degree <= 1 else 'b' for node, degree in simpler.degree().items()]
+        n_nodes = len(simpler.nodes())        
+        n_removed = len(list(filter(lambda x: x=='r', nc)))
+        if plot_all:
+            print('number of nodes in graph: {}, and number of nodes that will be removed: {}'.format(n_nodes, n_removed))
+            ox.plot_graph(simpler, node_color=nc, node_zorder=3)
 
+        for node, degree in simpler.degree().items():
+            if degree <= 1: 
+                simpler.remove_node(node)
+
+        if len(simpler.nodes()) == n_nodes:
+            break
+    return simpler
+
+
+from config import tmp
+from pathlib import Path
+
+def load_street_graph(coords, radius=1000, network_type='drive', filename=None, use_cached=True):
+    """
+    Loads street graph data that falls within the circle defined by a center
+    and a radius. Uses cached data, or download if necessary. 
+    
+    Args:
+        coords (tuple): (latitude,longitude) tuple of coordinates.
+        radius (int): radius in meters.
+        network_type (str): The type of street network to download.
+        name (str): optional alias for graph when stored on disk.
+        use_cached: Set to False to force redownload of graph data.
+        
+    Returns:
+        networkx.classes.multidigraph: street graph data
+    """
+    ### some path acrobatics for compatibility with osmnx
+    if filename:
+        assert filename.endswith('.graphml')
+    else:
+        filename = '{}-{}-{}.graphml'.format(coords, radius, network_type)
+    graph_file = Path(tmp, filename)
+    folder = str(tmp)
+    
+    if graph_file.exists() and use_cached:
+        print('restoring full street graph from disk')
+        street_graph = ox.load_graphml(filename=filename, folder=folder)
+    else:
+        print('downloading street graph')
+        street_graph = ox.graph_from_point(
+            coords, 
+            distance=radius,
+            distance_type='network', 
+            network_type=network_type, 
+            simplify=False)
+
+        print('saving graph to disk')
+        ox.save_graphml(
+            street_graph, 
+            filename=filename, 
+            folder=folder)
+    return street_graph
