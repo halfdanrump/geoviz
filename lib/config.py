@@ -8,7 +8,6 @@ network_type = 'drive'
 
 # folder for saving downloaded street graphs
 
-
 basepath = os.environ.get('GEOVIZ_TMP', None)
 
 tmp_folder_path = '~/geotmp' ### Set this to an existing folder

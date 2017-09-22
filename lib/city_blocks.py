@@ -1,10 +1,11 @@
 import numpy as np
 from numpy.linalg import norm
 from tqdm import tqdm
-from config import lat_key, lon_key
 from shapely.geometry import Polygon
 import geopandas as gpd
 import osmnx as ox
+from pathlib import Path
+from .config import lat_key, lon_key, tmp
 
 # Algorithm described here: 
 # https://blog.reactoweb.com/2012/04/algorithm-101-finding-all-polygons-in-an-undirected-graph/
@@ -117,8 +118,6 @@ def remove_deadends(g, plot_all=False):
     return simpler
 
 
-from config import tmp
-from pathlib import Path
 
 def load_street_graph(coords, radius=1000, network_type='drive', filename=None, use_cached=True):
     """
