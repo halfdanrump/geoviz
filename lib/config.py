@@ -1,4 +1,3 @@
-from pathlib import Path
 import os
 
 # set area name and radius (should be set dynamically rather than here)
@@ -12,9 +11,6 @@ basepath = os.environ.get('GEOVIZ_TMP', None)
 
 tmp_folder_path = '~/geotmp' ### Set this to an existing folder
 assert tmp_folder_path, 'please specify a path to store temprary/cached files'
-tmp = Path(tmp_folder_path).expanduser()
-
-assert tmp.exists(), 'please create the tmp folder manually, to avoid any funky mishaps'
 
 # Toggle this False to force city_blocks notebook to recalculate city_blocks
 cityblocks_use_cached = False

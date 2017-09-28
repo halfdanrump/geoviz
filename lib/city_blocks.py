@@ -5,7 +5,7 @@ from shapely.geometry import Polygon
 import geopandas as gpd
 import osmnx as ox
 from pathlib import Path
-from .config import lat_key, lon_key, tmp
+from .config import lat_key, lon_key, tmp_folder_path
 
 # Algorithm described here: 
 # https://blog.reactoweb.com/2012/04/algorithm-101-finding-all-polygons-in-an-undirected-graph/
@@ -134,6 +134,9 @@ def load_street_graph(coords, radius=1000, network_type='drive', filename=None, 
     Returns:
         networkx.classes.multidigraph: street graph data
     """
+    if use_cached:
+        tmp = Path(tmp_folder_path).expanduser()
+        assert tmp.exists(), 'please create the tmp folder manually, to avoid any funky mishaps'
     ### some path acrobatics for compatibility with osmnx
     if filename:
         assert filename.endswith('.graphml')
