@@ -1,0 +1,152 @@
+Title: Geospatial data analysis and visualization in Python
+Level: Mid
+This talk is for: data scientists, python engineers, anyone with data
+Requirements: geopandas, networkx, osmnx, folium&leaflet, shapely, scikit-learn
+keywords: graph-algorithms, clustering, geojson, data visualization, data mining
+
+
+説明
+In this talk I will introduce you to some very useful libraries for geospatial data visualization, as well as libraries for doing basic data analysis on geographically distributed data. I will talk about some of the challenges that I encountered when creating new maps, and about how I solved those problems. I will show you what I did with a dataset of restaurants from 食べログ, and also how you can start experimenting yourself on the open Safecast dataset of radioactivity levels in Japan. If you are interested in data mining, visualization and, of course maps, then this talk is for you.
+
+目標
+In this talk you will learn how to create great looking and interactive maps for visualizing datasets containing geospatial coordinates. I'll show you some of the maps that I made myself and talk about why they are useful. At that point you'll be curious how you can make such maps yourself, so I'll show you what Python libraries make it easy to create such maps. Finally I will also present some of the more difficult problems that I had to solve, why I had to solve them, and how. My aim is that you will leave the talk with a desire and knowhow to start making maps on your own. 
+
+
+概要 (outline, public)
+Interactive maps are a great for exploring and get a quick intuition of datasets containing geospatial coordinates. In this talk I will show you that you don't have to be a data scientist or a javascript expert to create such maps. More concretely, I will give a quick intro to some great libraries and show you how to:
+
+- use `osmnx` to download map data and convert into a street graph
+- use `geopandas`, `networkx` and `shapely` to manipulate street graphs and assign data points to areas
+- use  `folium` for creating beautiful and responsive maps that are rendered to html and javascript
+
+This covers the basic part of the talk, and I will then move into the second part,  covering some of the significant issues that I encountered while creating my maps:
+
+- how to deal with lack of geojson/shapefile boundary data for small areas
+- how to deal with geospatial data that changes over time
+
+Apart from the tools mentioned above, I used `networkx`, `scikit-learn`, and good old plain Python to solve these problems. I'll show you how :).
+
+outline, not public
+
+
+This is a rough overview of the slides that I have planned for the presentation. The order might change a bit, but the content is more or less fixed. Through the talk I will show several maps with data from Tabelog and SafeCast. 英語で発表しますが、質問は日本語で受け取ります。
+
+**section 1**
+*Downloading and manipulating maps in Python* (5分)
+
+- Downloading map data from open street map 
+ - Show how to use osmnx and to make a projection of the street map
+ - Show how osmnx represents the street map as a directed graph
+
+*Where to find boundary data and how to process it in Python* (5分)
+
+- Show a list of some of the useful websites for geospatial boundary data for Japan
+- Load GeoJson and Shapefile data and show how to convert between the formats
+ - Brief demo of the advantages and disadvantages of each file formats
+- use shapely create polygons of areas
+ - show a few useful methods for manipulating polygons and tell how they can be useful for creating maps
+- create geopandas dataframe and demonstrate most important functions
+ - plot the areas in the dataframe and spice up with matplotlib
+ - Brief explanation about coordinate projections and how they can be tricky
+ - show how to convert between projections (e.g. from Japanese coordinates (e.g. TOKYO97) to standard coordinates (WGS84))
+
+*Putting it all together* (5分)
+
+- creating a folium chloropleth
+ - use shapely and geopandas to calculate geometries and calculate statistics
+ - Show maps og Tabelog data with different styles of tiles using stamen tiles 
+
+
+** section 2**
+*Making your own boundaries in Python* (5分)
+
+- Breif description of the limitation of publicly available boundary files
+- expain my own two solutions
+ - using graph algorithm to calculate areas from street corners
+ - using scikit-learn to cluster data points and calculate areas
+- Show map of restaurant scores in Shinjuku
+ - Point out some 
+
+*Visualizing your data as it changes over time* (5分)
+
+- show how to prepare data for animation by manipulating dataframe
+- show how to group data by (time,area) and calculate statistics
+- demonstrate time slicer to add time dimension to chloropleth
+- show time animated chloropleth of safecast data
+
+*Summary + questions* (5分)
+
+- list of libraries that we used and what we used them for 
+- always start with a dataset and area that you know well
+- Why interactive maps are good for debugging your data calculations
+- why you should ue Python for making maps
+- share jupyter notebook used in talk and suggest people try out on open dataset
+
+
+
+90
+
+
+
+
+
+--------------------------------------------------------------------------------------
+About me:
+デンマーク出身。２００９年に日本に移住。早稲田大学大学院基幹理工学部で修士取得後、日本のIT企業に就職。現在は研究開発部で、機械学習とデータビジュアリゼーションに携わる。
+
+
+Many types of data are naturally associated with a set of geospatial coordinates (e.g. longitude and latitude).
+Examples: sensor networks, traffic data, 
+
+Say that you want to know where in Tokyo you should go to... 
+As a Python engineer, how would you answer that question? 
+
+Some of the difficulties are:
+ - Missing boundary data
+ - data that changes with time
+ - 
+
+While many data scientists have mapping tools as part of their toolbox, there is no reason why good maps should not be easy to make for engineers without a background in data science/ 
+
+
+
+Maps are a great way of exploring your data and get a quick overview of the landscape
+
+Furthermore making them interactive is also a great way of debugging your data crunching algorithms as the output of those algorithms is presented in an easy-to-understand way. 
+
+
+Additionally, making the map interactive will be even better for exploration! Making maps is probably the most natural and intuitive way of understanding your data, and you don't have to be a data cient...asdasd. Even better, you don't have to start messing around with Javascript either :). 
+
+
+There are a lot of great Python libraries for YYY and these days you no longer have to be an expert on computational XXX to ZZZZ. Libraries such as geopandas, folium, osmnx are excellent for manipulating and analyzing the data, that help you analyse and visualize your geospatial data. Using `shapely` extremely easy to answer questions such as "
+
+
+One of the problems that is quickly encountered when doing maps is that you need data for the geopgraphical boundaries of each area, such as prefectures, wards, etc.  Some data is available from official government sites, such as YYY, but it is often outdated and of bad resolution. The lowest level is sub-ward levels, which mostly cover hundreds of city blocks. One problem with this is that we often want to calculate statistics over smaller areas, but we do not have the required geojson data. In my case I wanted to calculate average restaurant scores for each city block in Tokyo. Solution. Implement our own path finding algorithm and create the geojson data ourselves! 
+
+Graph traversal algorithm to calculate 
+
+1 (why this talk and what tool)
+
+2 (what I did): 
+I will show you some of the maps that I made
+I have made maps for tabelog data and safecast data and I will show you some of these and talk about what we can learn from looking at such maps. 
+Answer seemingly difficult questions such as "reztaurants near big roads have a low rating"
+
+3: 
+Weather you're doing IOT and sensor networks or planning where to open your next restaurant, creating maps are for you. 
+Knowking how to do it quickly and without pain in Python is an extremely useful tool to have in your belt.
+
+
+No matter what programming language you use for making the maps, you will quickly run into a few problems. 
+
+problem solved: lack of geojson data for fine grained mapping
+Ways I talked this problem
+	- calculated boundaries using clustering algos
+	- calculates areas using graph theory and heuristic search algo
+
+problem solved: 
+geographically distributed data which also changes over time can be hard to visualize.
+How I solved this problem: 
+	- hacked folium to accept time changing data
+
+Start with sho

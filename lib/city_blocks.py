@@ -1,10 +1,10 @@
+from pathlib import Path
 import numpy as np
 from numpy.linalg import norm
 from tqdm import tqdm
 from shapely.geometry import Polygon
 import geopandas as gpd
 import osmnx as ox
-from pathlib import Path
 from .config import lat_key, lon_key, tmp_folder_path
 
 # Algorithm described here: 
@@ -17,13 +17,14 @@ def _angle(a,b):
 
 def _step(graph, edge, path, depth, traversed, edge_coords, polygons):
     depth += 1
-    
+
     # create list of successors to the edge
     successors = [(edge[1], n) for n in graph.neighbors(edge[1])]
 
-    # Remove edge in the opposite direction, so that the algorithm doesn't simple jump back to the previous point
+    # Remove edge in the opposite direction, so that the algorithm 
+    # doesn't simple jump back to the previous point
     successors.remove(tuple(np.flip((edge),0)))
-    
+
     # Remove edges that have already been traversed
     successors = list(filter(lambda s: s not in traversed, successors))
 
@@ -33,10 +34,10 @@ def _step(graph, edge, path, depth, traversed, edge_coords, polygons):
 
     # calculate angles to incoming edge and order successors by smallest angle
     angles = [_angle(edge_coords.get(edge), edge_coords.get(successor)) for successor in successors]
-    
+
     # pick leftmost edge
     edge_to_walk = successors[np.argmin(angles)]
-        
+
     if edge_to_walk in path:
         traversed.update([edge_to_walk])
         #We are back where we started, which means that we found a polygon
@@ -64,9 +65,9 @@ def city_blocks(street_graph):
     directed = street_graph.to_directed()
 
     # pre-compute mapping from edge name to edge coordinates
-    edge_coords = {(f,t): 
-               ([float(directed.node.get(f).get(lat_key))-float(directed.node.get(t).get(lat_key)), 
-                 float(directed.node.get(f).get(lon_key))-float(directed.node.get(t).get(lon_key))]) 
+    edge_coords = {(f,t):
+                ([float(directed.node.get(f).get(lat_key))-float(directed.node.get(t).get(lat_key)),
+                 float(directed.node.get(f).get(lon_key))-float(directed.node.get(t).get(lon_key))])
                for (f, t, d) in directed.edges(data=True)}
 
     traversed = set()
@@ -116,14 +117,14 @@ def remove_deadends(g, plot_all=False):
         if len(simpler.nodes()) == n_nodes:
             break
     return simpler
-
+ 
 
 
 def load_street_graph(coords, radius=1000, network_type='drive', filename=None, use_cached=True):
     """
     Loads street graph data that falls within the circle defined by a center
     and a radius. Uses cached data, or download if necessary. 
-    
+
     Args:
         coords (tuple): (latitude,longitude) tuple of coordinates.
         radius (int): radius in meters.
@@ -144,12 +145,13 @@ def load_street_graph(coords, radius=1000, network_type='drive', filename=None, 
         filename = '{}-{}-{}.graphml'.format(coords, radius, network_type)
     graph_file = Path(tmp, filename)
     folder = str(tmp)
-    
+
     if graph_file.exists() and use_cached:
         print('restoring full street graph from disk')
         street_graph = ox.load_graphml(filename=filename, folder=folder)
     else:
         print('downloading street graph')
+        print(coords, radius, network_type)
         street_graph = ox.graph_from_point(
             coords, 
             distance=radius,
